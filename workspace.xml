@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project GoBi_WS2016-17">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <!--<property name="dir.jarfile" value="C:/Users/Samuel/Documents"/>-->
+	<property name="dir.jarfile" value="/home/k/kleins/Documents/GenomorientierteBioinformatik/FINAL_JAR/assignment_2"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/solut_1.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="io.CommandlineHandler"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${dir.buildfile}/bin"/>
+        	<fileset dir="${dir.buildfile}/src"/>
+        	<fileset dir="${dir.buildfile}/jar-files"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jar-files/commons-io-2.5.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jar-files/colt-1.2.0.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jar-files/AugmentedTree.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jar-files/commons-math3-3.6.1.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jar-files/commons-lang3-3.5.jar"/>
+        	<zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/jar-files/htsjdk-2.7.0.jar"/>
+        	<zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/SAMsTOOL_v.ALPHA.01.jar"/>
+        </jar>
+    </target>
+</project>
