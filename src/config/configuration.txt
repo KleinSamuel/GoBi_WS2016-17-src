@@ -26,3 +26,6 @@ bam_comp_params	/home/proj/biosoft/praktikum/genprakt-ws16/assignment/a2/data/ba
 #
 # assignment 2 task 4 || bamsListFile,mainDirectory,mappingInfo,GTF
 bam_multi_comp_params	/home/proj/biosoft/praktikum/genprakt-ws16/assignment/a2/data/bams.list,/home/proj/biosoft/praktikum/genprakt-ws16/assignment/a2/data/,/home/proj/biosoft/praktikum/genprakt-ws16/assignment/a2/data/comparative_eval.mappinginfo,/home/proj/biosoft/praktikum/genprakt-ws16/gtf/Homo_sapiens.GRCh37.75.gtf
+#
+# assignment 3 task 2 || mappinginfo.tsv
+mappinginfo_a3t2	/home/proj/biosoft/praktikum/genprakt-ws16/assignment/a3/data/EBV/mappinginfos.tsv

@@ -3,6 +3,7 @@ package plotting;
 import java.io.File;
 import java.util.Vector;
 
+import commandline.ColorCodingCommandline;
 import debugStuff.DebugMessageFactory;
 import io.AllroundFileWriter;
 import io.ConfigReader;
@@ -41,7 +42,7 @@ public class BarPlot extends Plot{
 		
 		try {
 			
-			DebugMessageFactory.printNormalDebugMessage(ConfigReader.DEBUG_MODE, "Wait for R to plot..");
+			DebugMessageFactory.printNormalDebugMessage(ConfigReader.DEBUG_MODE, ColorCodingCommandline.toBlue("Wait for R to plot.."));
 			t.join();
 			DebugMessageFactory.printNormalDebugMessage(ConfigReader.DEBUG_MODE, "("+this.filename+".png) R thread terminated.");
 			

@@ -22,7 +22,7 @@ public class TemporaryFile {
 		
 		try {
 			tmp = File.createTempFile("tmp", ".txt", new File(filepath));
-			tmp.deleteOnExit();
+//			tmp.deleteOnExit();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

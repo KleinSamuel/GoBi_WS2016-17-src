@@ -9,7 +9,7 @@ public class BAMFilePaths {
 	private static String pathToMappinginfo = ConfigReader.readConfig().get("mappinginfo_a3t2");
 	private static ArrayList<String> pathList = new ArrayList<>();
 	
-	public static void getPathList(){
+	public static ArrayList<String> getPathList(){
 		pathList.add(E2er_rep1_contextmap);
 		pathList.add(E2er_rep1_hisat);
 		pathList.add(E2er_rep1_star);
@@ -58,6 +58,8 @@ public class BAMFilePaths {
 		pathList.add(E2noerchx_rep3_hisat);
 		pathList.add(E2noerchx_rep3_star);
 		pathList.add(E2noerchx_rep3_tophat);
+		
+		return pathList;
 	}
 	
 	/*
