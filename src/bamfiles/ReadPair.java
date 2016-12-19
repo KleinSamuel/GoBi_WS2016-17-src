@@ -230,11 +230,11 @@ public class ReadPair {
 		if (matchedGenes == null) {
 			// get genes spanning forward read and genes spanning reverse reads
 			// spanning means: gene.start <= start && gene.stop >= stop
-			LinkedList<Gene> possibleGenes = Anders.ga.getChromosome(getReferenceName())
+			LinkedList<Gene> possibleGenes = BAMFileReader.ga.getChromosome(getReferenceName())
 					.getSpecificStrandGenes(forward.getReadNegativeStrandFlag())
 					.getIntervalsSpanning(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>());
 			if (possibleGenes.size() == 0) {
-				intergenic = Anders.ga.getChromosome(getReferenceName())
+				intergenic = BAMFileReader.ga.getChromosome(getReferenceName())
 						.getSpecificStrandGenes(forward.getReadNegativeStrandFlag())
 						.getIntervalsIntersecting(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>())
 						.isEmpty();
@@ -388,7 +388,7 @@ public class ReadPair {
 	}
 
 	public boolean checkIfAntisense() {
-		LinkedList<Gene> possibleGenes = Anders.ga.getChromosome(getReferenceName())
+		LinkedList<Gene> possibleGenes = BAMFileReader.ga.getChromosome(getReferenceName())
 				.getSpecificStrandGenes(!forward.getReadNegativeStrandFlag())
 				.getIntervalsSpanning(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>());
 		if (possibleGenes.isEmpty())
@@ -432,10 +432,10 @@ public class ReadPair {
 
 	public int getGeneDist() {
 		if (geneDistance == Integer.MIN_VALUE) {
-			LinkedList<Gene> neighbourLeft = Anders.ga.getChromosome(getReferenceName())
+			LinkedList<Gene> neighbourLeft = BAMFileReader.ga.getChromosome(getReferenceName())
 					.getSpecificStrandGenes(forward.getReadNegativeStrandFlag())
 					.getIntervalsLeftNeighbor(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>()),
-					neighbourRight = Anders.ga.getChromosome(getReferenceName())
+					neighbourRight = BAMFileReader.ga.getChromosome(getReferenceName())
 							.getSpecificStrandGenes(forward.getReadNegativeStrandFlag()).getIntervalsRightNeighbor(
 									genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>());
 			if (!neighbourLeft.isEmpty() || !neighbourRight.isEmpty()) {
