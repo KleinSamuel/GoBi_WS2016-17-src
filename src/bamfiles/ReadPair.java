@@ -24,7 +24,7 @@ public class ReadPair {
 													// intronic matches
 	private LinkedList<Transcript> matchedTranscripts;
 	private int mismatchCount = 0, clippingSize = 0, splitCount = -2, geneDistance = Integer.MIN_VALUE, pcrIndex = 0;
-	private boolean intergenic = false, antisense = false, intronic = false, merged = false;
+	private boolean intergenic = false, antisense = false, intronic = false, merged = false, transcriptomic = false;
 	private Interval genomicRegion;
 	private String XX;
 
@@ -355,11 +355,6 @@ public class ReadPair {
 			// intronic genes contains intronic genes
 			HashSet<Gene> matchedGenesAndTrs = new HashSet<>();
 			matchedTranscripts = checkTranscripts(possiblePerfectTrs);
-			if (debugCheck) {
-				for (Transcript t : matchedTranscripts)
-					System.out.print(t.getId() + "|");
-				System.out.println();
-			}
 			for (Transcript t : matchedTranscripts) {
 				matchedGenesAndTrs.add(t.getParentalGene());
 			}
@@ -377,6 +372,7 @@ public class ReadPair {
 					return matchedGenes;
 				}
 			} else {
+				transcriptomic = true;
 				return matchedGenes;
 			}
 			if (allMatched.isEmpty()) {
@@ -572,7 +568,9 @@ public class ReadPair {
 	public boolean isMerged() {
 		return merged;
 	}
-	
-	
+
+	public boolean isTranscriptomic() {
+		return transcriptomic;
+	}
 
 }
