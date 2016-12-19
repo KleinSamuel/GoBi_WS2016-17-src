@@ -1,9 +1,11 @@
 package genomeAnnotation;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import augmentedTree.IntervalTree;
+import util.GenRegVecUtil;
+import util.Interval;
+import util.UnionTranscript;
 
 public class Gene extends GenomicRegion {
 
@@ -13,8 +15,9 @@ public class Gene extends GenomicRegion {
 	private HashMap<String, Exon> exons;
 	private IntervalTree<Transcript> transcriptsOnPositiveStrand, transcriptsOnNegativeStrand, transcriptsOnBothStrands;
 	private IntervalTree<Exon> exonsOnPositiveStrand, exonsOnNegativeStrand, exonsOnBothStrands;
+	private IntervalTree<Interval> union = null;
 
-	private IntervalTree<Intron> intronsOnPositiveStrand = null, intronsOnNegativeStrand = null;
+	private IntervalTree<Interval> intronsOnPositiveStrand = null, intronsOnNegativeStrand = null;
 
 	public Gene(int start, int stop, String id, boolean onNegativeStrand, String biotype, String name,
 			Chromosome parent) {
@@ -69,43 +72,20 @@ public class Gene extends GenomicRegion {
 		return chromosome;
 	}
 
-	public IntervalTree<Intron> getIntrons(boolean onNegativeStrand) {
+	public IntervalTree<Interval> getIntrons(boolean onNegativeStrand) {
 		if (onNegativeStrand) {
 			if (intronsOnNegativeStrand == null)
-				calcIntrons(exonsOnNegativeStrand, intronsOnNegativeStrand, onNegativeStrand);
+				intronsOnNegativeStrand = GenRegVecUtil.getExonsAsTree(exonsOnNegativeStrand);
 			return intronsOnNegativeStrand;
 		} else {
 			if (intronsOnPositiveStrand == null)
-				calcIntrons(exonsOnPositiveStrand, intronsOnPositiveStrand, onNegativeStrand);
+				intronsOnPositiveStrand = GenRegVecUtil.getExonsAsTree(exonsOnPositiveStrand);
 			return intronsOnPositiveStrand;
 		}
 	}
 
 	public IntervalTree<Exon> getAllExonsSorted() {
 		return exonsOnBothStrands;
-	}
-
-	public void calcIntrons(IntervalTree<Exon> exons, IntervalTree<Intron> introns, boolean onNegativeStrand) {
-		introns = new IntervalTree<Intron>();
-		Iterator<Exon> exonIt = exons.iterator();
-		Exon current = null, next = null;
-		if (exonIt.hasNext()) {
-			current = exonIt.next();
-			if (current.getStart() > getStart())
-				introns.add(new Intron(getStart(), current.getStart() - 1, "", onNegativeStrand));
-		}
-		while (exonIt.hasNext()) {
-			next = exonIt.next();
-			// check that they are not directly one after the other
-			if (current.getStop() < next.getStart() - 1)
-				introns.add(new Intron(current.getStop() + 1, next.getStart() - 1, "", onNegativeStrand));
-			current = next;
-		}
-		if (current != null) {
-			if (current.getStop() < getStop())
-				introns.add(new Intron(current.getStop() + 1, getStop(), "", onNegativeStrand));
-		}
-
 	}
 
 	public String getBiotype() {
@@ -137,6 +117,13 @@ public class Gene extends GenomicRegion {
 		}
 		longestTr = longestTranscript;
 		return longestLength;
+	}
+
+	public IntervalTree<Interval> getUnionTranscript() {
+		if (union == null) {
+			union = new UnionTranscript(this).getCombinedExons();
+		}
+		return union;
 	}
 
 	public String getName() {

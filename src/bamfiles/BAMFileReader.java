@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import debugStuff.DebugMessageFactory;
+import genomeAnnotation.GenomeAnnotation;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
@@ -17,12 +18,16 @@ public class BAMFileReader {
 	// readId, waitingRead
 	private HashMap<String, SAMRecord> waitingRecords;
 	private String bamFile;
+	public static GenomeAnnotation ga;
+	
 	private Counter counter;
 
 	public BAMFileReader(String bamPath, Counter counter) {
 		bamFile = bamPath;
 		waitingRecords = new HashMap<>();
 		this.counter = counter;
+//		ga = GTFParser.readGtfFile("h.ens.75", gtfPath);
+		ga = null;
 	}
 
 	public void readBAMFile() {
@@ -83,8 +88,6 @@ public class BAMFileReader {
 						
 						String[] forward = ((String)sam.getAttribute("XX")).split("\t");
 						
-//						System.out.println(Arrays.toString(forward));
-						
 						/* not inconsistent */
 						if(forward.length > 1){
 							
@@ -108,6 +111,10 @@ public class BAMFileReader {
 							}
 							
 						}
+						
+						/* task 3 */
+						
+						
 						
 					}
 				}
