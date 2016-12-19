@@ -1,17 +1,22 @@
 package bamfiles;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 
+import assignment_3.Gene_Counts;
 import debugStuff.DebugMessageFactory;
+import genomeAnnotation.Gene;
 import genomeAnnotation.GenomeAnnotation;
+import genomeAnnotation.Transcript;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
 import io.ConfigReader;
+import javafx.util.Pair;
+import reader.GTFParser;
 
 public class BAMFileReader {
 
@@ -21,13 +26,14 @@ public class BAMFileReader {
 	public static GenomeAnnotation ga;
 	
 	private Counter counter;
+	private Pair<HashMap<String, Gene_Counts>, HashMap<String, HashMap<String, Integer>>> map;
 
-	public BAMFileReader(String bamPath, Counter counter) {
+	public BAMFileReader(String bamPath, Counter counter, Pair<HashMap<String, Gene_Counts>, HashMap<String, HashMap<String, Integer>>> map) {
 		bamFile = bamPath;
 		waitingRecords = new HashMap<>();
 		this.counter = counter;
-//		ga = GTFParser.readGtfFile("h.ens.75", gtfPath);
-		ga = null;
+		this.map = map;
+		ga = GTFParser.readGtfFile("h.ens.75", "/home/proj/biosoft/praktikum/genprakt-ws16/gtf/Homo_sapiens.GRCh37.75.gtf");
 	}
 
 	public void readBAMFile() {
@@ -84,37 +90,133 @@ public class BAMFileReader {
 						validPairs++;
 						
 						/* task 2 */
-						this.counter.addNRP();
-						
-						String[] forward = ((String)sam.getAttribute("XX")).split("\t");
-						
-						/* not inconsistent */
-						if(forward.length > 1){
+						if(counter != null){
 							
-							int genCount = Integer.parseInt(forward[2].split(":")[1]);
+							this.counter.addNRP();
 							
-							if(genCount == 0){
-								this.counter.addIntergenicNRP();
-							}else if(genCount == 1){
+							if(rp.getMatchedGenes().size() == 1){
 								this.counter.addMappedNRP();
-							}else if(genCount > 1){
+							}
+							if(rp.getMatchedGenes().size() > 1){
 								this.counter.addMultimappedNRP();
 							}
-							if(forward[4].contains("MERGED")){
+							
+							if(rp.isTranscriptomic()){
+								this.counter.addTranscriptomicNRP();
+							}
+							if(rp.isMerged()){
 								this.counter.addMergedTranscriptNRP();
 							}
-							if(forward[4].contains("INTRON")){
+							if(rp.isIntronic()){
 								this.counter.addIntronicNRP();
 							}
-							if(forward.length >= 6 && forward[5].contains("antisense:true")){
+							if(rp.isAntisense()){
 								this.counter.addAntisenseNRP();
+							}
+							if(rp.isIntergenic()){
+								this.counter.addIntergenicNRP();
 							}
 							
 						}
 						
 						/* task 3 */
-						
-						
+						if(map != null){
+							
+							LinkedList<Gene> genes = rp.getMatchedGenes();
+							
+							for(Gene g : genes){
+								
+								/* gene already contained */
+								if(map.getKey().containsKey(g.getId())){
+									
+									Gene_Counts counts = map.getKey().get(g.getId());
+									
+									counts.addNRPwithinGenReg();
+									
+									if(rp.getMatchedGenes().size() == 1){
+										counts.addNRPwithinGenRegWitoutOtherGenReg();
+									}
+									if(rp.isIntronic()){
+										counts.addNRPintronic();
+									}
+									if(rp.isTranscriptomic()){
+										counts.addNRPtranscriptomic();
+										
+										for(Transcript t : g.getAllTranscriptsSorted()){
+											
+											if(map.getValue().containsKey(g.getId())){
+												
+												if(map.getValue().get(g.getId()).containsKey(t.getId())){
+													map.getValue().get(g.getId()).put(t.getId(), map.getValue().get(g.getId()).get(t.getId())+1);
+												}else{
+													map.getValue().get(g.getId()).put(t.getId(), 1);
+												}
+												
+											}else{
+												
+												HashMap<String, Integer> tmp = new HashMap<>();
+												tmp.put(t.getId(), 1);
+												map.getValue().put(g.getId(), tmp);
+												
+											}
+											
+										}
+										
+									}
+									if(rp.isMerged()){
+										counts.addNRPmergedTr();
+									}
+									
+									
+									
+								}
+								/* gene is not contained */
+								else{
+									
+									Gene_Counts counts = new Gene_Counts();
+									
+									counts.addNRPwithinGenReg();
+									
+									if(rp.getMatchedGenes().size() == 1){
+										counts.addNRPwithinGenRegWitoutOtherGenReg();
+									}
+									if(rp.isIntronic()){
+										counts.addNRPintronic();
+									}
+									if(rp.isTranscriptomic()){
+										counts.addNRPtranscriptomic();
+										
+										for(Transcript t : g.getAllTranscriptsSorted()){
+											
+											if(map.getValue().containsKey(g.getId())){
+												
+												if(map.getValue().get(g.getId()).containsKey(t.getId())){
+													map.getValue().get(g.getId()).put(t.getId(), map.getValue().get(g.getId()).get(t.getId())+1);
+												}else{
+													map.getValue().get(g.getId()).put(t.getId(), 1);
+												}
+												
+											}else{
+												
+												HashMap<String, Integer> tmp = new HashMap<>();
+												tmp.put(t.getId(), 1);
+												map.getValue().put(g.getId(), tmp);
+												
+											}
+											
+										}
+										
+									}
+									if(rp.isMerged()){
+										counts.addNRPmergedTr();
+									}
+									
+									map.getKey().put(g.getId(), counts);
+								}
+								
+							}
+							
+						}
 						
 					}
 				}
