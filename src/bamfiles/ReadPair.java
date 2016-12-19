@@ -1,7 +1,12 @@
 package bamfiles;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import augmentedTree.IntervalTree;
 import genomeAnnotation.Exon;
@@ -26,7 +31,7 @@ public class ReadPair {
 	private int mismatchCount = 0, clippingSize = 0, splitCount = -2, geneDistance = Integer.MIN_VALUE, pcrIndex = 0;
 	private boolean intergenic = false, antisense = false, intronic = false, merged = false, transcriptomic = false;
 	private Interval genomicRegion;
-	private String XX;
+	private String XX, calculatedXX = null;
 
 	private boolean debugCheck = false;
 
@@ -107,6 +112,10 @@ public class ReadPair {
 			System.out.println("is not antisense " + getReferenceName() + " " + getReadName() + " "
 					+ forward.getReadNegativeStrandFlag());
 			debugError();
+		}
+		if (!XX.equals(getAttributeXX())) {
+			System.out.println(XX);
+			System.out.println(getAttributeXX());
 		}
 	}
 
@@ -491,19 +500,63 @@ public class ReadPair {
 	}
 
 	public String getAttributeXX() {
-		String s = "mm:" + mismatchCount + "\tclipping:" + clippingSize + "\tgcount:" + matchedGenes.size()
-				+ "\tnsplit:" + splitCount + "\tgdist:" + geneDistance + "\tantisense:" + antisense + "\tpcrindex:"
-				+ pcrIndex;
-		s += "\tgenes: ";
-		for (Gene g : matchedGenes) {
-			s += g.getId() + "," + g.getBiotype() + ";";
-		}
-		if (matchedTranscripts != null) {
-			for (Transcript t : matchedTranscripts) {
-				s += t.getId() + ";";
+		if (calculatedXX == null) {
+			calculatedXX = "mm:" + mismatchCount + "\tclipping:" + clippingSize + "\tgcount:" + matchedGenes.size()
+					+ "\tnsplit:" + splitCount + "\t";
+			if (matchedGenes.size() > 0) {
+				Collections.sort(matchedGenes, new Comparator<Gene>() {
+
+					@Override
+					public int compare(Gene o1, Gene o2) {
+						return o1.getId().compareTo(o2.getId());
+					}
+				});
+				if (transcriptomic) {
+					TreeMap<String, TreeSet<String>> sorted = new TreeMap<>();
+					TreeSet<String> trs = null;
+					for (Transcript t : matchedTranscripts) {
+						trs = sorted.get(t.getParentalGene().getId());
+						if (trs == null) {
+							trs = new TreeSet<>();
+							sorted.put(t.getParentalGene().getId(), trs);
+						}
+						trs.add(t.getId());
+					}
+					for (Entry<String, TreeSet<String>> e : sorted.entrySet()) {
+						calculatedXX += e.getKey() + "," + Anders.ga.getGene(e.getKey()).getBiotype() + ":";
+						for (String t : e.getValue()) {
+							calculatedXX += t + ",";
+						}
+						calculatedXX = calculatedXX.substring(0, calculatedXX.length() - 1);
+						calculatedXX += "\t";
+					}
+					calculatedXX = calculatedXX.substring(0, calculatedXX.length() - 1);
+				} else {
+					if (merged) {
+						for (Gene g : matchedGenes) {
+							calculatedXX += g.getId() + "," + g.getBiotype() + ":MERGED\t";
+						}
+						calculatedXX = calculatedXX.substring(0, calculatedXX.length() - 1);
+					} else {
+						if (intronic) {
+							for (Gene g : matchedGenes) {
+								calculatedXX += g.getId() + "," + g.getBiotype() + ":INTRON\t";
+							}
+							calculatedXX = calculatedXX.substring(0, calculatedXX.length() - 1);
+						}
+					}
+				}
+			} else {
+				if (intergenic) {
+					calculatedXX += "gdist:" + geneDistance + "\t";
+				}
+				calculatedXX += "antisense:" + antisense;
 			}
+			String[] pcrIndexArr = XX.split("\t");
+			String pcr = pcrIndexArr[pcrIndexArr.length - 1];
+			calculatedXX += "\tpcrindex: " + pcr.split(": ")[1];
 		}
-		return s;
+		return calculatedXX;
 	}
 
 	public SAMRecord getForward() {
