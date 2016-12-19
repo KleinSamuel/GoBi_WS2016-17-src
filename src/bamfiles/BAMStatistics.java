@@ -63,7 +63,6 @@ public class BAMStatistics {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -76,13 +75,14 @@ public class BAMStatistics {
 		
 		ArrayList<String> paths = BAMFilePaths.getPathList();
 		
-		TreeMap<Double, Integer> geneTrans = new TreeMap<>();
-		TreeMap<Double, Integer> geneIntron = new TreeMap<>();
 		
 		for(String s : paths){
 			
 			this.countMap = new HashMap<>();
 			this.transCountMap = new HashMap<>();
+			
+			TreeMap<Double, Integer> geneTrans = new TreeMap<>();
+			TreeMap<Double, Integer> geneIntron = new TreeMap<>();
 			
 			double gene_tr_FPKM = 0.0;
 			double gene_intron_FPKM = 0.0;
@@ -106,6 +106,14 @@ public class BAMStatistics {
 				ew.writeToWriter(entry.getValue().getNRPintronic()+"\t");
 				ew.writeToWriter(entry.getValue().getNRPtranscriptomic()+"\t");
 				ew.writeToWriter(entry.getValue().getNRPmergedTr()+"\t");
+				
+//				gene_tr_FPKM = (Math.pow(10, 9) * entry.getValue().getNRPtranscriptomic())/();
+				
+				if(geneTrans.containsKey(gene_tr_FPKM)){
+					geneTrans.put(gene_tr_FPKM, geneTrans.get(gene_tr_FPKM)+1);
+				}else{
+					geneTrans.put(gene_tr_FPKM, 1);
+				}
 				
 				HashMap<String, Integer> tmp = transCountMap.get(entry.getKey());
 				Integer max = 0;
