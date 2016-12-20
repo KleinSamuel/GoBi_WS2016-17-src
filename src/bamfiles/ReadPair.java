@@ -14,7 +14,6 @@ import genomeAnnotation.Gene;
 import genomeAnnotation.Transcript;
 import htsjdk.samtools.AlignmentBlock;
 import htsjdk.samtools.SAMRecord;
-import util.Anders;
 import util.GenRegVecUtil;
 import util.Interval;
 
@@ -31,18 +30,19 @@ public class ReadPair {
 	private int mismatchCount = 0, clippingSize = 0, splitCount = -2, geneDistance = Integer.MIN_VALUE, pcrIndex = 0;
 	private boolean intergenic = false, antisense = false, intronic = false, merged = false, transcriptomic = false;
 	private Interval genomicRegion;
-	private String XX, calculatedXX = null;
+	// private String XX;
+	private String calculatedXX = null;
 
-	private boolean debugCheck = false;
+	// private boolean debugCheck = false;
 
 	public ReadPair(SAMRecord forward, SAMRecord reverse, boolean isStarMapping) {
 		this.forward = forward;
 		this.reverse = reverse;
-		XX = (String) forward.getAttribute("XX");
-		if (XX == null)
-			XX = (String) reverse.getAttribute("XX");
-		if (getReadName().equals("55367095"))
-			debugCheck = true;
+		// XX = (String) forward.getAttribute("XX");
+		// if (XX == null)
+		// XX = (String) reverse.getAttribute("XX");
+		// if (getReadName().equals("55367095"))
+		// debugCheck = true;
 		this.isStarMapping = isStarMapping;
 		// blocksForward = GenRegVecUtil.parseAlignmentBlocks(forward);
 		blocksForward = new LinkedList<>();
@@ -62,107 +62,63 @@ public class ReadPair {
 				Math.max(blocksForward.getLast().getStop(), blocksReverse.getLast().getStop()));
 		calcSplitCount();
 		if (splitCount == -1) {
-			if (!XX.contains("inconsistent")) {
-				System.out.println("Error");
-				System.exit(1);
-			}
 			return;
 		}
 		if (splitCount > -1) {
-			if (splitCount != (Integer.parseInt(XX.split("\t")[3].split(":")[1]))) {
-				System.out.println(splitCount + "!=" + Integer.parseInt(XX.split("\t")[3].split(":")[1]));
-				debugError();
-			}
 			calcMissmatches();
 			calcClipping();
 			getMatchedGenes();
 		}
-		if (XX.contains("MERGED") && !merged) {
-			System.out.println("should be merged " + getReadName());
-			System.out.println("intronic: " + intronic);
-			System.out.println(getAttributeXX());
-			debugError();
-		}
-		if (!XX.contains("MERGED") && merged) {
-			System.out.println("shouldn't be merged " + getReadName());
-			System.out.println(getAttributeXX());
-			debugError();
-		}
-		if (!XX.contains("INTRON") && intronic) {
-			System.out.println("shouldn't be intronic " + getReadName());
-			System.out.println(getAttributeXX());
-			debugError();
-		}
-		if (XX.contains("INTRON") && !intronic) {
-			System.out.println("should be intronic " + getReadName());
-			System.out.println(getAttributeXX());
-			debugError();
-		}
-		if (XX.contains("antisense:true") && !antisense) {
-			System.out.println("should be antisense " + getReferenceName() + " " + getReadName() + " "
-					+ forward.getReadNegativeStrandFlag());
-			debugError();
-		}
-		if (XX.contains("antisense:false") && antisense) {
-			System.out.println("shouldn't be antisense " + getReferenceName() + " " + getReadName() + " "
-					+ forward.getReadNegativeStrandFlag());
-			debugError();
-		}
-		if (!XX.contains("antisense") && antisense) {
-			System.out.println("is not antisense " + getReferenceName() + " " + getReadName() + " "
-					+ forward.getReadNegativeStrandFlag());
-			debugError();
-		}
-		if (!XX.equals(getAttributeXX())) {
-			System.out.println(XX);
-			System.out.println(getAttributeXX());
-		}
 	}
 
-	public void debugError() {
-		System.out.println(XX);
-		System.out.print("forward:");
-		for (AlignmentBlock ab : forward.getAlignmentBlocks()) {
-			System.out.print((ab.getReferenceStart() - 1) + "-" + (ab.getReferenceStart() + ab.getLength() - 2) + "|");
-		}
-		System.out.println();
-		System.out.print("reverse:");
-		for (AlignmentBlock ab : reverse.getAlignmentBlocks()) {
-			System.out.print((ab.getReferenceStart() - 1) + "-" + (ab.getReferenceStart() + ab.getLength() - 2) + "|");
-		}
-		System.out.println();
-		System.out.print("forwardReadStart:");
-		for (AlignmentBlock ab : forward.getAlignmentBlocks()) {
-			System.out.print((ab.getReadStart() - 1) + "-" + (ab.getReadStart() + ab.getLength() - 2) + "|");
-		}
-		System.out.println();
-		System.out.print("reverseReadStart:");
-		for (AlignmentBlock ab : reverse.getAlignmentBlocks()) {
-			System.out.print((ab.getReadStart() - 1) + "-" + (ab.getReadStart() + ab.getLength() - 2) + "|");
-		}
-		System.out.println();
-		System.out.print("forwardMe:");
-		for (Interval ab : blocksForward) {
-			System.out.print(ab.toString() + "|");
-		}
-		System.out.println();
-		System.out.print("reverseMe:");
-		for (Interval ab : blocksReverse) {
-			System.out.print(ab.toString() + "|");
-		}
-		System.out.println();
-		System.out.print("intronsFor:");
-		for (Interval ab : intronsForward) {
-			System.out.print(ab.toString() + "|");
-		}
-		System.out.println();
-		System.out.print("intronsRev:");
-		for (Interval ab : intronsReverse) {
-			System.out.print(ab.toString() + "|");
-		}
-		System.out.println();
-		System.exit(1);
-	}
+	// public void debugError() {
+	// System.out.println(XX);
+	// System.out.print("forward:");
+	// for (AlignmentBlock ab : forward.getAlignmentBlocks()) {
+	// System.out.print((ab.getReferenceStart() - 1) + "-" +
+	// (ab.getReferenceStart() + ab.getLength() - 2) + "|");
+	// }
+	// System.out.println();
+	// System.out.print("reverse:");
+	// for (AlignmentBlock ab : reverse.getAlignmentBlocks()) {
+	// System.out.print((ab.getReferenceStart() - 1) + "-" +
+	// (ab.getReferenceStart() + ab.getLength() - 2) + "|");
+	// }
+	// System.out.println();
+	// System.out.print("forwardReadStart:");
+	// for (AlignmentBlock ab : forward.getAlignmentBlocks()) {
+	// System.out.print((ab.getReadStart() - 1) + "-" + (ab.getReadStart() +
+	// ab.getLength() - 2) + "|");
+	// }
+	// System.out.println();
+	// System.out.print("reverseReadStart:");
+	// for (AlignmentBlock ab : reverse.getAlignmentBlocks()) {
+	// System.out.print((ab.getReadStart() - 1) + "-" + (ab.getReadStart() +
+	// ab.getLength() - 2) + "|");
+	// }
+	// System.out.println();
+	// System.out.print("forwardMe:");
+	// for (Interval ab : blocksForward) {
+	// System.out.print(ab.toString() + "|");
+	// }
+	// System.out.println();
+	// System.out.print("reverseMe:");
+	// for (Interval ab : blocksReverse) {
+	// System.out.print(ab.toString() + "|");
+	// }
+	// System.out.println();
+	// System.out.print("intronsFor:");
+	// for (Interval ab : intronsForward) {
+	// System.out.print(ab.toString() + "|");
+	// }
+	// System.out.println();
+	// System.out.print("intronsRev:");
+	// for (Interval ab : intronsReverse) {
+	// System.out.print(ab.toString() + "|");
+	// }
+	// System.out.println();
+	// System.exit(1);
+	// }
 
 	public void calcMissmatches() {
 		Integer missInForw = (Integer) forward.getAttribute("NM");
@@ -523,7 +479,7 @@ public class ReadPair {
 						trs.add(t.getId());
 					}
 					for (Entry<String, TreeSet<String>> e : sorted.entrySet()) {
-						calculatedXX += e.getKey() + "," + Anders.ga.getGene(e.getKey()).getBiotype() + ":";
+						calculatedXX += e.getKey() + "," + BAMFileReader.ga.getGene(e.getKey()).getBiotype() + ":";
 						for (String t : e.getValue()) {
 							calculatedXX += t + ",";
 						}
@@ -552,9 +508,7 @@ public class ReadPair {
 				}
 				calculatedXX += "antisense:" + antisense;
 			}
-			String[] pcrIndexArr = XX.split("\t");
-			String pcr = pcrIndexArr[pcrIndexArr.length - 1];
-			calculatedXX += "\tpcrindex: " + pcr.split(": ")[1];
+			calculatedXX += "\tpcrindex: " + pcrIndex;
 		}
 		return calculatedXX;
 	}
@@ -575,16 +529,16 @@ public class ReadPair {
 		return forward.getReferenceName();
 	}
 
-	public boolean checkIfOutputEqualsRef() {
-		String[] o = getAttributeXX().split("\t"), r = XX.split("\t");
-		for (int i = 0; i < 3; i++) {
-			if (!o[i].equals(r[i])) {
-				System.out.println(getAttributeXX() + "\n" + XX);
-				return false;
-			}
-		}
-		return true;
-	}
+	// public boolean checkIfOutputEqualsRef() {
+	// String[] o = getAttributeXX().split("\t"), r = XX.split("\t");
+	// for (int i = 0; i < 3; i++) {
+	// if (!o[i].equals(r[i])) {
+	// System.out.println(getAttributeXX() + "\n" + XX);
+	// return false;
+	// }
+	// }
+	// return true;
+	// }
 
 	public LinkedList<Transcript> getMatchedTranscripts() {
 		return matchedTranscripts;
