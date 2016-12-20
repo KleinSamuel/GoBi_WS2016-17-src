@@ -19,12 +19,12 @@ public class Anders {
 	// readId, waitingRead
 	private HashMap<String, SAMRecord> waitingRecords;
 	private String bamFile;
-//	public static GenomeAnnotation ga;
+	public static GenomeAnnotation ga;
 
 	public Anders(String bamPath, String gtfPath) {
 		bamFile = bamPath;
 		waitingRecords = new HashMap<>();
-//		ga = GTFParser.readGtfFile("h.ens.75", gtfPath);
+		ga = GTFParser.readGtfFile("h.ens.75", gtfPath);
 	}
 
 	public void readBAMFile() {
@@ -69,9 +69,9 @@ public class Anders {
 						validPairs++;
 						if (rp.getSplitCount() < 0) {
 							splitInconsistent++;
-						} else if (!rp.checkIfOutputEqualsRef()) {
-							wrong++;
-						}
+						} // else if (!rp.checkIfOutputEqualsRef()) {
+							// wrong++;
+							// }
 					}
 				}
 			} else {
