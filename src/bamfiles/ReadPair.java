@@ -523,7 +523,7 @@ public class ReadPair {
 						trs.add(t.getId());
 					}
 					for (Entry<String, TreeSet<String>> e : sorted.entrySet()) {
-						calculatedXX += e.getKey() + "," + Anders.ga.getGene(e.getKey()).getBiotype() + ":";
+						calculatedXX += e.getKey() + "," + BAMFileReader.ga.getGene(e.getKey()).getBiotype() + ":";
 						for (String t : e.getValue()) {
 							calculatedXX += t + ",";
 						}
