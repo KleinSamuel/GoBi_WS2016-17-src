@@ -26,14 +26,19 @@ public class BAMFileReader {
 	public static GenomeAnnotation ga;
 	
 	private Counter counter;
-	private Pair<HashMap<String, Gene_Counts>, HashMap<String, HashMap<String, Integer>>> map;
+	private HashMap<String, Gene_Counts> map;
 
-	public BAMFileReader(String bamPath, Counter counter, Pair<HashMap<String, Gene_Counts>, HashMap<String, HashMap<String, Integer>>> map) {
+	public BAMFileReader(String bamPath, Counter counter, HashMap<String, Gene_Counts> map) {
 		bamFile = bamPath;
 		waitingRecords = new HashMap<>();
 		this.counter = counter;
 		this.map = map;
 		ga = GTFParser.readGtfFile("h.ens.75", "/home/proj/biosoft/praktikum/genprakt-ws16/gtf/Homo_sapiens.GRCh37.75.gtf");
+		
+		BAMStatistics.allNRP = 0;
+		BAMStatistics.mergedTrNRP = 0;
+		BAMStatistics.transCountMap = new HashMap<>();
+		BAMStatistics.mergedTrLength = new HashMap<>();
 	}
 
 	public void readBAMFile() {
@@ -122,14 +127,16 @@ public class BAMFileReader {
 						/* task 3 */
 						if(map != null){
 							
+							BAMStatistics.allNRP++;
+							
 							LinkedList<Gene> genes = rp.getMatchedGenes();
 							
 							for(Gene g : genes){
 								
 								/* gene already contained */
-								if(map.getKey().containsKey(g.getId())){
+								if(map.containsKey(g.getId())){
 									
-									Gene_Counts counts = map.getKey().get(g.getId());
+									Gene_Counts counts = map.get(g.getId());
 									
 									counts.addNRPwithinGenReg();
 									
@@ -144,19 +151,19 @@ public class BAMFileReader {
 										
 										for(Transcript t : g.getAllTranscriptsSorted()){
 											
-											if(map.getValue().containsKey(g.getId())){
+											if(BAMStatistics.transCountMap.containsKey(g.getId())){
 												
-												if(map.getValue().get(g.getId()).containsKey(t.getId())){
-													map.getValue().get(g.getId()).put(t.getId(), map.getValue().get(g.getId()).get(t.getId())+1);
+												if(BAMStatistics.transCountMap.get(g.getId()).containsKey(t.getId())){
+													BAMStatistics.transCountMap.get(g.getId()).put(t.getId(), BAMStatistics.transCountMap.get(g.getId()).get(t.getId())+1);
 												}else{
-													map.getValue().get(g.getId()).put(t.getId(), 1);
+													BAMStatistics.transCountMap.get(g.getId()).put(t.getId(), 1);
 												}
 												
 											}else{
 												
 												HashMap<String, Integer> tmp = new HashMap<>();
 												tmp.put(t.getId(), 1);
-												map.getValue().put(g.getId(), tmp);
+												BAMStatistics.transCountMap.put(g.getId(), tmp);
 												
 											}
 											
@@ -165,6 +172,18 @@ public class BAMFileReader {
 									}
 									if(rp.isMerged()){
 										counts.addNRPmergedTr();
+										
+										int len = 0;
+										for(Transcript i : rp.getMatchedTranscripts()){
+											len += i.getLength();
+										}
+										if(BAMStatistics.mergedTrLength.containsKey(g.getId())){
+											BAMStatistics.mergedTrLength.put(g.getId(), BAMStatistics.mergedTrLength.get(g.getId()) + len);
+										}else{
+											BAMStatistics.mergedTrLength.put(g.getId(), len);
+										}
+										
+										BAMStatistics.mergedTrNRP++;
 									}
 									
 									
@@ -188,19 +207,19 @@ public class BAMFileReader {
 										
 										for(Transcript t : g.getAllTranscriptsSorted()){
 											
-											if(map.getValue().containsKey(g.getId())){
+											if(BAMStatistics.transCountMap.containsKey(g.getId())){
 												
-												if(map.getValue().get(g.getId()).containsKey(t.getId())){
-													map.getValue().get(g.getId()).put(t.getId(), map.getValue().get(g.getId()).get(t.getId())+1);
+												if(BAMStatistics.transCountMap.get(g.getId()).containsKey(t.getId())){
+													BAMStatistics.transCountMap.get(g.getId()).put(t.getId(), BAMStatistics.transCountMap.get(g.getId()).get(t.getId())+1);
 												}else{
-													map.getValue().get(g.getId()).put(t.getId(), 1);
+													BAMStatistics.transCountMap.get(g.getId()).put(t.getId(), 1);
 												}
 												
 											}else{
 												
 												HashMap<String, Integer> tmp = new HashMap<>();
 												tmp.put(t.getId(), 1);
-												map.getValue().put(g.getId(), tmp);
+												BAMStatistics.transCountMap.put(g.getId(), tmp);
 												
 											}
 											
@@ -209,9 +228,19 @@ public class BAMFileReader {
 									}
 									if(rp.isMerged()){
 										counts.addNRPmergedTr();
+										
+										int len = 0;
+										for(Transcript i : rp.getMatchedTranscripts()){
+											len += i.getLength();
+										}
+										if(BAMStatistics.mergedTrLength.containsKey(g.getId())){
+											BAMStatistics.mergedTrLength.put(g.getId(), BAMStatistics.mergedTrLength.get(g.getId()) + len);
+										}else{
+											BAMStatistics.mergedTrLength.put(g.getId(), len);
+										}
 									}
 									
-									map.getKey().put(g.getId(), counts);
+									map.put(g.getId(), counts);
 								}
 								
 							}
