@@ -95,7 +95,7 @@ public class ReadSimulator {
 		ExternalFileWriter simulMappingWriter = new ExternalFileWriter();
 		simulMappingWriter.openWriter(ch.getDefaultOutputPath()+"simulmapping.info");
 		
-		simulMappingWriter.writeToWriter("READ_ID\tCHR\tGENE_ID\tTRANSCRIPT_ID\tFW_REGVEC\tRW_REGVEC\tFW_REGVEC_TRANSCRIPT\tRW_REGVEC_TRANSCRIPT\tFW_MUT\tRW_MUT\n");
+		simulMappingWriter.writeToWriter("read_id\tchr\tgene_id\ttranscript_id\tfw_regvec\trw_regvec\tfw_regvec_transcript\trw_regvec_transcript\tfw_mut\trw_mut\n");
 		
 		int amountReads = 0;
 		int amountNonSplicedReads = 0;
