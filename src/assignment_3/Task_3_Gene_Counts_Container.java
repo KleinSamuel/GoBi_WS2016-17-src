@@ -78,7 +78,7 @@ public class Task_3_Gene_Counts_Container {
 	private TreeMap<Double, Integer> trFpkmOcc, intronFpkmOcc, mainTrOcc;
 
 	public void calculateStats() {
-		Anders.ga.iterator()
+		Anders.ga.iterator();
 		trFpkmOcc = new TreeMap<>();
 		intronFpkmOcc = new TreeMap<>();
 		mainTrOcc = new TreeMap<>();
