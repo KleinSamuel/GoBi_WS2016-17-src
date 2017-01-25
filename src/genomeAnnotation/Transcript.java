@@ -10,7 +10,7 @@ public class Transcript extends GenomicRegion {
 
 	private Gene gene;
 	private IntervalTree<Exon> exons;
-	private IntervalTree<Intron> introns;
+	private IntervalTree<Intron> introns = null;
 	private CDS cds;
 	private int exonicLength = -1;
 

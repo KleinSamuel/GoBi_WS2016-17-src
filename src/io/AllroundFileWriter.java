@@ -41,6 +41,42 @@ public class AllroundFileWriter {
 
 		try {
 
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file, append));
+
+			if (append) {
+				bw.newLine();
+				bw.append(convertedVector);
+			} else {
+				bw.write(convertedVector);
+			}
+
+			bw.flush();
+			bw.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void writeVector(Vector<Object> vector, File file, boolean append, String separator) {
+
+		String convertedVector = "";
+
+		for (Object d : vector) {
+
+			if (d instanceof String) {
+				convertedVector += "\"" + String.valueOf(d) + "\"" + separator;
+			} else {
+				convertedVector += String.valueOf(d) + separator;
+			}
+		}
+
+		if (convertedVector.length() > 0) {
+			convertedVector = convertedVector.substring(0, convertedVector.length() - 1);
+		}
+
+		try {
+
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
 
 			if (append) {

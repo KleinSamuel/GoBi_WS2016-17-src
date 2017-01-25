@@ -2,7 +2,7 @@ package util;
 
 import debugStuff.DebugMessageFactory;
 
-public class Interval implements augmentedTree.Interval {
+public class Interval implements augmentedTree.Interval, Comparable<Interval> {
 
 	private int start, stop;
 
@@ -77,6 +77,14 @@ public class Interval implements augmentedTree.Interval {
 		}
 		return new Interval(Integer.parseInt(s.substring(0, i)) + startPlusMinus,
 				Integer.parseInt(s.substring(i + 1)) + stopPlusMinus);
+	}
+
+	@Override
+	public int compareTo(Interval o) {
+		if (this.start == o.getStart()) {
+			return Integer.compare(stop, o.getStop());
+		}
+		return Integer.compare(start, o.getStart());
 	}
 
 }

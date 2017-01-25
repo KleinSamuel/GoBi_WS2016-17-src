@@ -58,7 +58,7 @@ public class UnionTranscript {
 			calculateCombinedExons();
 		int sum = 0;
 		for (Interval i : combinedExons)
-			sum += i.getStop() - i.getStart() + 1;
+			sum += i.getLength();
 		exonicLength = sum;
 	}
 

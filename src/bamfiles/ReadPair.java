@@ -14,11 +14,13 @@ import genomeAnnotation.Gene;
 import genomeAnnotation.Transcript;
 import htsjdk.samtools.AlignmentBlock;
 import htsjdk.samtools.SAMRecord;
+import util.Anders;
 import util.GenRegVecUtil;
 import util.Interval;
 
 public class ReadPair {
 
+	private LinkedList<Gene> spanningGenes = new LinkedList<>();
 	private SAMRecord forward, reverse;
 	private boolean isStarMapping;
 	private LinkedList<Interval> blocksForward, blocksReverse;
@@ -30,40 +32,41 @@ public class ReadPair {
 	private int mismatchCount = 0, clippingSize = 0, splitCount = -2, geneDistance = Integer.MIN_VALUE, pcrIndex = 0;
 	private boolean intergenic = false, antisense = false, intronic = false, merged = false, transcriptomic = false;
 	private Interval genomicRegion;
-	// private String XX;
+	public String XX;
 	private String calculatedXX = null;
-
-	// private boolean debugCheck = false;
+	private boolean onNegativeStrand = false;
 
 	public ReadPair(SAMRecord forward, SAMRecord reverse, boolean isStarMapping) {
 		this.forward = forward;
 		this.reverse = reverse;
-		// XX = (String) forward.getAttribute("XX");
-		// if (XX == null)
-		// XX = (String) reverse.getAttribute("XX");
-		// if (getReadName().equals("55367095"))
-		// debugCheck = true;
+		onNegativeStrand = forward.getReadNegativeStrandFlag();
+		XX = (String) forward.getAttribute("XX");
+		if (XX == null)
+			XX = (String) reverse.getAttribute("XX");
 		this.isStarMapping = isStarMapping;
 		// blocksForward = GenRegVecUtil.parseAlignmentBlocks(forward);
 		blocksForward = new LinkedList<>();
 		for (AlignmentBlock ab : forward.getAlignmentBlocks()) {
 			blocksForward.add(new Interval(ab.getReferenceStart() - 1, ab.getReferenceStart() + ab.getLength() - 2));
 		}
+
 		blocksForward = GenRegVecUtil.merge(blocksForward);
 		intronsForward = GenRegVecUtil.getIntrons(blocksForward);
 		blocksReverse = new LinkedList<>();
 		for (AlignmentBlock ab : reverse.getAlignmentBlocks()) {
 			blocksReverse.add(new Interval(ab.getReferenceStart() - 1, ab.getReferenceStart() + ab.getLength() - 2));
 		}
+
 		blocksReverse = GenRegVecUtil.merge(blocksReverse);
 		// blocksReverse = GenRegVecUtil.parseAlignmentBlocks(reverse);
 		intronsReverse = GenRegVecUtil.getIntrons(blocksReverse);
-		genomicRegion = new Interval(Math.min(blocksForward.getFirst().getStart(), blocksReverse.getFirst().getStart()),
-				Math.max(blocksForward.getLast().getStop(), blocksReverse.getLast().getStop()));
+		genomicRegion = new Interval(Math.min(forward.getAlignmentStart(), reverse.getAlignmentStart()) - 1,
+				Math.max(forward.getAlignmentEnd(), reverse.getAlignmentEnd()) - 1);
 		calcSplitCount();
 		if (splitCount == -1) {
 			return;
 		}
+
 		if (splitCount > -1) {
 			calcMissmatches();
 			calcClipping();
@@ -71,54 +74,13 @@ public class ReadPair {
 		}
 	}
 
-	// public void debugError() {
-	// System.out.println(XX);
-	// System.out.print("forward:");
-	// for (AlignmentBlock ab : forward.getAlignmentBlocks()) {
-	// System.out.print((ab.getReferenceStart() - 1) + "-" +
-	// (ab.getReferenceStart() + ab.getLength() - 2) + "|");
-	// }
-	// System.out.println();
-	// System.out.print("reverse:");
-	// for (AlignmentBlock ab : reverse.getAlignmentBlocks()) {
-	// System.out.print((ab.getReferenceStart() - 1) + "-" +
-	// (ab.getReferenceStart() + ab.getLength() - 2) + "|");
-	// }
-	// System.out.println();
-	// System.out.print("forwardReadStart:");
-	// for (AlignmentBlock ab : forward.getAlignmentBlocks()) {
-	// System.out.print((ab.getReadStart() - 1) + "-" + (ab.getReadStart() +
-	// ab.getLength() - 2) + "|");
-	// }
-	// System.out.println();
-	// System.out.print("reverseReadStart:");
-	// for (AlignmentBlock ab : reverse.getAlignmentBlocks()) {
-	// System.out.print((ab.getReadStart() - 1) + "-" + (ab.getReadStart() +
-	// ab.getLength() - 2) + "|");
-	// }
-	// System.out.println();
-	// System.out.print("forwardMe:");
-	// for (Interval ab : blocksForward) {
-	// System.out.print(ab.toString() + "|");
-	// }
-	// System.out.println();
-	// System.out.print("reverseMe:");
-	// for (Interval ab : blocksReverse) {
-	// System.out.print(ab.toString() + "|");
-	// }
-	// System.out.println();
-	// System.out.print("intronsFor:");
-	// for (Interval ab : intronsForward) {
-	// System.out.print(ab.toString() + "|");
-	// }
-	// System.out.println();
-	// System.out.print("intronsRev:");
-	// for (Interval ab : intronsReverse) {
-	// System.out.print(ab.toString() + "|");
-	// }
-	// System.out.println();
-	// System.exit(1);
-	// }
+	public Interval getGenomicRegion() {
+		return genomicRegion;
+	}
+
+	public boolean isOnNegativeStrand() {
+		return onNegativeStrand;
+	}
 
 	public void calcMissmatches() {
 		Integer missInForw = (Integer) forward.getAttribute("NM");
@@ -191,19 +153,23 @@ public class ReadPair {
 		return false;
 	}
 
+	public LinkedList<Gene> getSpanningGenes() {
+		return spanningGenes;
+	}
+
 	public LinkedList<Gene> getMatchedGenes() {
 		if (matchedGenes == null) {
 			// get genes spanning forward read and genes spanning reverse reads
 			// spanning means: gene.start <= start && gene.stop >= stop
-			LinkedList<Gene> possibleGenes = BAMFileReader.ga.getChromosome(getReferenceName())
+			LinkedList<Gene> possibleGenes = Anders.ga.getChromosome(getReferenceName())
 					.getSpecificStrandGenes(forward.getReadNegativeStrandFlag())
 					.getIntervalsSpanning(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>());
+			spanningGenes = possibleGenes;
 			if (possibleGenes.size() == 0) {
-				intergenic = BAMFileReader.ga.getChromosome(getReferenceName())
+				intergenic = Anders.ga.getChromosome(getReferenceName())
 						.getSpecificStrandGenes(forward.getReadNegativeStrandFlag())
-						.getIntervalsIntersecting(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>())
+						.getIntervalsSpannedBy(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>())
 						.isEmpty();
-
 				if (!intergenic)
 					geneDistance = 0;
 				else
@@ -353,31 +319,14 @@ public class ReadPair {
 	}
 
 	public boolean checkIfAntisense() {
-		LinkedList<Gene> possibleGenes = BAMFileReader.ga.getChromosome(getReferenceName())
+		LinkedList<Gene> possibleGenes = Anders.ga.getChromosome(getReferenceName())
 				.getSpecificStrandGenes(!forward.getReadNegativeStrandFlag())
 				.getIntervalsSpanning(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>());
 		if (possibleGenes.isEmpty())
 			return false;
-		// OUTER: for (Gene g : possibleGenes) {
-		// for (Interval forwardInt : blocksForward) {
-		// if (g.getAllExonsSorted()
-		// .getIntervalsSpanning(forwardInt.getStart(), forwardInt.getStop(),
-		// new LinkedList<>())
-		// .isEmpty()) {
-		// continue OUTER;
-		// }
-		// }
-		// for (Interval reverseInt : blocksReverse) {
-		// if (g.getAllExonsSorted()
-		// .getIntervalsSpanning(reverseInt.getStart(), reverseInt.getStop(),
-		// new LinkedList<>())
-		// .isEmpty()) {
-		// continue OUTER;
-		// }
-		// }
+
 		return true;
-		// }
-		// return false;
+
 	}
 
 	public boolean checkIfMerged(Gene g) {
@@ -397,10 +346,10 @@ public class ReadPair {
 
 	public int getGeneDist() {
 		if (geneDistance == Integer.MIN_VALUE) {
-			LinkedList<Gene> neighbourLeft = BAMFileReader.ga.getChromosome(getReferenceName())
+			LinkedList<Gene> neighbourLeft = Anders.ga.getChromosome(getReferenceName())
 					.getSpecificStrandGenes(forward.getReadNegativeStrandFlag())
 					.getIntervalsLeftNeighbor(genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>()),
-					neighbourRight = BAMFileReader.ga.getChromosome(getReferenceName())
+					neighbourRight = Anders.ga.getChromosome(getReferenceName())
 							.getSpecificStrandGenes(forward.getReadNegativeStrandFlag()).getIntervalsRightNeighbor(
 									genomicRegion.getStart(), genomicRegion.getStop(), new LinkedList<>());
 			if (!neighbourLeft.isEmpty() || !neighbourRight.isEmpty()) {
@@ -410,8 +359,8 @@ public class ReadPair {
 					if (neighbourRight.isEmpty()) {
 						geneDistance = genomicRegion.getStart() - neighbourLeft.getFirst().getStop() - 1;
 					} else {
-						geneDistance = Math.min((genomicRegion.getStart() - neighbourLeft.getFirst().getStop()),
-								(neighbourRight.getFirst().getStart() - genomicRegion.getStop())) - 1;
+						geneDistance = Math.min((genomicRegion.getStart() - neighbourLeft.getFirst().getStop() - 1),
+								(neighbourRight.getFirst().getStart() - genomicRegion.getStop() - 1));
 					}
 				}
 			}
@@ -479,7 +428,7 @@ public class ReadPair {
 						trs.add(t.getId());
 					}
 					for (Entry<String, TreeSet<String>> e : sorted.entrySet()) {
-						calculatedXX += e.getKey() + "," + BAMFileReader.ga.getGene(e.getKey()).getBiotype() + ":";
+						calculatedXX += e.getKey() + "," + Anders.ga.getGene(e.getKey()).getBiotype() + ":";
 						for (String t : e.getValue()) {
 							calculatedXX += t + ",";
 						}
@@ -513,6 +462,14 @@ public class ReadPair {
 		return calculatedXX;
 	}
 
+	public LinkedList<Interval> getForwardRegions() {
+		return blocksForward;
+	}
+
+	public LinkedList<Interval> getReverseRegions() {
+		return blocksReverse;
+	}
+
 	public SAMRecord getForward() {
 		return forward;
 	}
@@ -529,16 +486,17 @@ public class ReadPair {
 		return forward.getReferenceName();
 	}
 
-	// public boolean checkIfOutputEqualsRef() {
-	// String[] o = getAttributeXX().split("\t"), r = XX.split("\t");
-	// for (int i = 0; i < 3; i++) {
-	// if (!o[i].equals(r[i])) {
-	// System.out.println(getAttributeXX() + "\n" + XX);
-	// return false;
-	// }
-	// }
-	// return true;
-	// }
+	public LinkedList<Interval> getForwardIntrons() {
+		return intronsForward;
+	}
+
+	public LinkedList<Interval> getReverseIntrons() {
+		return intronsReverse;
+	}
+
+	public void setPCRindex(int index) {
+		this.pcrIndex = index;
+	}
 
 	public LinkedList<Transcript> getMatchedTranscripts() {
 		return matchedTranscripts;
@@ -578,6 +536,10 @@ public class ReadPair {
 
 	public boolean isTranscriptomic() {
 		return transcriptomic;
+	}
+
+	public boolean compareXX() {
+		return XX.equals(getAttributeXX());
 	}
 
 }

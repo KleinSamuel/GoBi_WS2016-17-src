@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import assignment_3.Gene_Counts;
+import assignment_3.Task_3_Gene_Counts;
 import debugStuff.DebugMessageFactory;
 import genomeAnnotation.Gene;
 import genomeAnnotation.GenomeAnnotation;
@@ -26,9 +26,9 @@ public class BAMFileReader {
 	public static GenomeAnnotation ga;
 	
 	private Counter counter;
-	private HashMap<String, Gene_Counts> map;
+	private HashMap<String, Task_3_Gene_Counts> map;
 
-	public BAMFileReader(String bamPath, Counter counter, HashMap<String, Gene_Counts> map) {
+	public BAMFileReader(String bamPath, Counter counter, HashMap<String, Task_3_Gene_Counts> map) {
 		bamFile = bamPath;
 		waitingRecords = new HashMap<>();
 		this.counter = counter;
@@ -136,7 +136,7 @@ public class BAMFileReader {
 								/* gene already contained */
 								if(map.containsKey(g.getId())){
 									
-									Gene_Counts counts = map.get(g.getId());
+									Task_3_Gene_Counts counts = map.get(g.getId());
 									
 									counts.addNRPwithinGenReg();
 									
@@ -192,7 +192,7 @@ public class BAMFileReader {
 								/* gene is not contained */
 								else{
 									
-									Gene_Counts counts = new Gene_Counts();
+									Task_3_Gene_Counts counts = new Task_3_Gene_Counts();
 									
 									counts.addNRPwithinGenReg();
 									

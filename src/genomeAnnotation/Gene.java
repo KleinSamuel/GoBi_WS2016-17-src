@@ -15,7 +15,7 @@ public class Gene extends GenomicRegion {
 	private HashMap<String, Exon> exons;
 	private IntervalTree<Transcript> transcriptsOnPositiveStrand, transcriptsOnNegativeStrand, transcriptsOnBothStrands;
 	private IntervalTree<Exon> exonsOnPositiveStrand, exonsOnNegativeStrand, exonsOnBothStrands;
-	private IntervalTree<Interval> union = null;
+	private UnionTranscript mergedTranscript = null;
 
 	private IntervalTree<Interval> intronsOnPositiveStrand = null, intronsOnNegativeStrand = null;
 
@@ -120,10 +120,17 @@ public class Gene extends GenomicRegion {
 	}
 
 	public IntervalTree<Interval> getUnionTranscript() {
-		if (union == null) {
-			union = new UnionTranscript(this).getCombinedExons();
+		if (mergedTranscript == null) {
+			mergedTranscript = new UnionTranscript(this);
 		}
-		return union;
+		return mergedTranscript.getCombinedExons();
+	}
+
+	public UnionTranscript getMergedTranscript() {
+		if (mergedTranscript == null) {
+			mergedTranscript = new UnionTranscript(this);
+		}
+		return mergedTranscript;
 	}
 
 	public String getName() {
