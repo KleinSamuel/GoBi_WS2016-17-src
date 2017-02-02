@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.commons.math3.stat.inference.TTest;
 
 import javafx.util.Pair;
 import plotting.LinePlot;
@@ -16,6 +17,10 @@ import plotting.LinePlot;
 public class RelevantIntronReader {
 
 	ArrayList<RelevantIntron> intronList;
+	
+	public RelevantIntronReader(){
+		
+	}
 	
 	public RelevantIntronReader(String path){
 		intronList = new ArrayList<>();
@@ -39,37 +44,81 @@ public class RelevantIntronReader {
 		}
 	}
 	
-	public void deriveFoldchanges(RelevantIntron intron){
+	public HashMap<Pair<Integer, Integer>, double[]> deriveFoldchanges(RelevantIntron intron){
 		
-		BetaDistribution betaDistrib = new BetaDistribution(1.0, 1.5);
+		HashMap<Pair<Integer, Integer>, double[]> foldChanges = new HashMap<>();
 		
-		/* 80 % credible interval */
-		double cred80 = 1 - 0.8;
-		double low_bound_80 = betaDistrib.inverseCumulativeProbability(cred80 / 2.0);
-		double upp_bound_80 = betaDistrib.inverseCumulativeProbability(1 - cred80 / 2.0);
-		double log2fc_80_low = Math.log(1.0 / low_bound_80 - 1.0) / Math.log(2);
-		double log2fc_80_upp = Math.log(1.0 / upp_bound_80 - 1.0) / Math.log(2);
+		for (int i = 0; i < 25; i++) {
+			for (int j = 0; j < 59; j++) {
 		
-		/* 85 % credible interval */
-		double cred85 = 1 - 0.85;
-		double low_bound_85 = betaDistrib.inverseCumulativeProbability(cred85 / 2.0);
-		double upp_bound_85 = betaDistrib.inverseCumulativeProbability(1 - cred85 / 2.0);
-		double log2fc_85_low = Math.log(1.0 / low_bound_85 - 1.0) / Math.log(2);
-		double log2fc_85_upp = Math.log(1.0 / upp_bound_85 - 1.0) / Math.log(2);
+				BetaDistribution betaDistrib = new BetaDistribution(i + 1.0, j + 1.0);
+				
+				/* 80 % credible interval */
+				double cred80 = 1 - 0.8;
+				double low_bound_80 = betaDistrib.inverseCumulativeProbability(cred80 / 2.0);
+				double upp_bound_80 = betaDistrib.inverseCumulativeProbability(1 - cred80 / 2.0);
+				double log2fc_80_low = Math.log(1.0 / low_bound_80 - 1.0) / Math.log(2);
+				double log2fc_80_upp = Math.log(1.0 / upp_bound_80 - 1.0) / Math.log(2);
+				
+				/* 85 % credible interval */
+				double cred85 = 1 - 0.85;
+				double low_bound_85 = betaDistrib.inverseCumulativeProbability(cred85 / 2.0);
+				double upp_bound_85 = betaDistrib.inverseCumulativeProbability(1 - cred85 / 2.0);
+				double log2fc_85_low = Math.log(1.0 / low_bound_85 - 1.0) / Math.log(2);
+				double log2fc_85_upp = Math.log(1.0 / upp_bound_85 - 1.0) / Math.log(2);
+				
+				/* 90 % credible interval */
+				double cred90 = 1 - 0.9;
+				double low_bound_90 = betaDistrib.inverseCumulativeProbability(cred90 / 2.0);
+				double upp_bound_90 = betaDistrib.inverseCumulativeProbability(1 - cred90 / 2.0);
+				double log2fc_90_low = Math.log(1.0 / low_bound_90 - 1.0) / Math.log(2);
+				double log2fc_90_upp = Math.log(1.0 / upp_bound_90 - 1.0) / Math.log(2);
+				
+				/* 95 % credible interval */
+				double cred95 = 1 - 0.95;
+				double low_bound_95 = betaDistrib.inverseCumulativeProbability(cred95 / 2.0);
+				double upp_bound_95 = betaDistrib.inverseCumulativeProbability(1 - cred95 / 2.0);
+				double log2fc_95_low = Math.log(1.0 / low_bound_95 - 1.0) / Math.log(2);
+				double log2fc_95_upp = Math.log(1.0 / upp_bound_95 - 1.0) / Math.log(2);
+				
+				foldChanges.put(new Pair<Integer, Integer>(i, j), new double[]{log2fc_80_low, log2fc_80_upp, log2fc_85_low, log2fc_85_upp, log2fc_90_low, log2fc_90_upp, log2fc_95_low, log2fc_95_upp});
 		
-		/* 90 % credible interval */
-		double cred90 = 1 - 0.9;
-		double low_bound_90 = betaDistrib.inverseCumulativeProbability(cred90 / 2.0);
-		double upp_bound_90 = betaDistrib.inverseCumulativeProbability(1 - cred90 / 2.0);
-		double log2fc_90_low = Math.log(1.0 / low_bound_90 - 1.0) / Math.log(2);
-		double log2fc_90_upp = Math.log(1.0 / upp_bound_90 - 1.0) / Math.log(2);
+			}
+		}
 		
-		/* 95 % credible interval */
-		double cred95 = 1 - 0.95;
-		double low_bound_95 = betaDistrib.inverseCumulativeProbability(cred95 / 2.0);
-		double upp_bound_95 = betaDistrib.inverseCumulativeProbability(1 - cred95 / 2.0);
-		double log2fc_95_low = Math.log(1.0 / low_bound_95 - 1.0) / Math.log(2);
-		double log2fc_95_upp = Math.log(1.0 / upp_bound_95 - 1.0) / Math.log(2);
+		return foldChanges;
+	}
+	
+	public void executeDETest(RelevantIntron i1, RelevantIntron i2){
+		
+		TTest test = new TTest();
+		
+		HashMap<Pair<Integer, Integer>, double[]> foldChanges_i1 = deriveFoldchanges(i1);
+		HashMap<Pair<Integer, Integer>, double[]> foldChanges_i2 = deriveFoldchanges(i2);
+		
+		double[] bigArray_i1 = new double[11800];
+		
+		int cnt = 0;
+		for(double[] dArray : foldChanges_i1.values()){
+			for(double d : dArray){
+				bigArray_i1[cnt] = d;
+				cnt++;
+			}
+		}
+		
+		double[] bigArray_i2 = new double[11800];
+		
+		cnt = 0;
+		for(double[] dArray : foldChanges_i2.values()){
+			for(double d : dArray){
+				bigArray_i2[cnt] = d;
+				cnt++;
+			}
+		}
+		
+		double result = test.tTest(bigArray_i1, bigArray_i2);
+		
+		System.out.println("RESULT: "+result);
 	}
 	
 	public void generateCumulativePlot(){
@@ -146,7 +195,8 @@ public class RelevantIntronReader {
 	
 	public static void main(String[] args) {
 		
-		
+		RelevantIntronReader r = new RelevantIntronReader();
+		r.executeDETest(new RelevantIntron("", 0, 0, false), new RelevantIntron("", 0, 0, false));
 		
 	}
 }
