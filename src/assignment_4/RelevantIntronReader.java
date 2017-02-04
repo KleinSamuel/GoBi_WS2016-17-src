@@ -33,7 +33,7 @@ public class RelevantIntronReader {
 			
 			while((line = br.readLine()) != null){
 				String[] lineArray = line.split(":");
-				intronList.add(new RelevantIntron(lineArray[0], Integer.parseInt(lineArray[1]), Integer.parseInt(lineArray[2]), false));
+				intronList.add(new RelevantIntron(lineArray[0], lineArray[1], Integer.parseInt(lineArray[1]), Integer.parseInt(lineArray[2]), false));
 			}
 			
 			br.close();
@@ -191,12 +191,5 @@ public class RelevantIntronReader {
 		lp.filename = "consistent_introns.png";
 		lp.showLegend = false;
 		lp.plot();
-	}
-	
-	public static void main(String[] args) {
-		
-		RelevantIntronReader r = new RelevantIntronReader();
-		r.executeDETest(new RelevantIntron("", 0, 0, false), new RelevantIntron("", 0, 0, false));
-		
 	}
 }

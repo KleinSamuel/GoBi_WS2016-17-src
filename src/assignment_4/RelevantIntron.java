@@ -2,16 +2,24 @@ package assignment_4;
 
 import java.util.ArrayList;
 
-public class RelevantIntron {
+import util.Interval;
+
+public class RelevantIntron extends Interval{
 
 	private String geneID;
+	private String chromosomeID;
 	private int start;
 	private int stop;
 	private boolean isOnNegativeStrand;
 	private ArrayList<RelevantIntron> overlappingIntrons;
+	boolean toRemove = true;
+	double[] values;
+	int pointerInValues;
 	
-	public RelevantIntron(String geneID, int start, int stop, boolean isOnNegativeStrand){
+	public RelevantIntron(String geneID, String chromosomeId, int start, int stop, boolean isOnNegativeStrand){
+		super(start, stop);
 		this.setGeneID(geneID);
+		this.setChromosomeID(chromosomeId);
 		this.setStart(start);
 		this.setStop(stop);
 		this.setOnNegativeStrand(isOnNegativeStrand);
@@ -32,6 +40,10 @@ public class RelevantIntron {
 	
 	public boolean isOnSameStrand(boolean isNegative){
 		return (this.isOnNegativeStrand == isNegative);
+	}
+	
+	public boolean isOnSameChromosome(String chrID){
+		return this.chromosomeID.equals(chrID);
 	}
 	
 	public boolean overlaps(RelevantIntron i){
@@ -89,6 +101,14 @@ public class RelevantIntron {
 	
 	public void addOverlappingIntron(RelevantIntron i){
 		this.overlappingIntrons.add(i);
+	}
+
+	public String getChromosomeID() {
+		return chromosomeID;
+	}
+
+	public void setChromosomeID(String chromosomeID) {
+		this.chromosomeID = chromosomeID;
 	}
 	
 }
