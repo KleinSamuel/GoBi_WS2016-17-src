@@ -3,6 +3,8 @@ package io;
 import java.io.File;
 import java.io.IOException;
 
+import debugStuff.DebugMessageFactory;
+
 /**
  * Handle temporary files
  * 
@@ -36,6 +38,7 @@ public class TemporaryFile {
 	 * @return File temporary file
 	 */
 	public static File createTempFile() {
+		DebugMessageFactory.printInfoDebugMessage(ConfigReader.DEBUG_MODE, "Creating temp file at "+ConfigReader.readConfig().get("temp_directory"));
 		return createTempFile(ConfigReader.readConfig().get("temp_directory"));
 	}
 

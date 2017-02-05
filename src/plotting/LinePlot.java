@@ -153,7 +153,7 @@ public class LinePlot extends Plot {
 		AllroundFileWriter.writeVector(this.legendLabels, tmp, true);
 
 		String command = "";
-		command += String.format("png(filename = \"%s\",width=3.25,height=3.25,units=\"in\",res=400,pointsize=4);",
+		command += String.format("png(filename=\"%s\",width=3.25,height=3.25,units=\"in\",res=400,pointsize=4);",
 				filename);
 		command += String.format("x<-scan(\"%s\",nlines=1,skip=0);", tmp);
 		command += String.format("y<-scan(\"%s\",nlines=1,skip=1);", tmp);

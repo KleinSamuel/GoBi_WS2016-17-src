@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.commons.math3.stat.inference.TTest;
@@ -19,6 +20,7 @@ import io.ConfigHelper;
 import io.ConfigReader;
 import io.ExternalFileWriter;
 import javafx.util.Pair;
+import plotting.LinePlot;
 
 public class GenesplitTSVReader {
 	
@@ -421,6 +423,58 @@ public class GenesplitTSVReader {
 		
 	}
 	
+	public void createCumulativePlotOverlapIntronsPerGene(){
+		
+		TreeMap<String, Integer> geneCountMap = new TreeMap<>();
+		
+		/* count overlapping pairs for each gene */
+		for(Pair<RelevantIntron, RelevantIntron> pair : overlapPairs){
+			/* gene id already in map */
+			if(geneCountMap.containsKey(pair.getKey().getGeneID())){
+				geneCountMap.put(pair.getKey().getGeneID(), geneCountMap.get(pair.getKey().getGeneID()) + 1);
+			}
+			/* gene id not in map */
+			else{
+				geneCountMap.put(pair.getKey().getGeneID(), 1);
+			}
+		}
+		
+		/* create cumulative sum */
+		TreeMap<Integer, Integer> countMap = new TreeMap<>();
+		for(Integer i : geneCountMap.values()){
+			if(countMap.containsKey(i)){
+				countMap.put(i, countMap.get(i) + 1);
+			}else{
+				countMap.put(i, 1);
+			}
+		}
+		geneCountMap = null;
+		
+		Vector<Object> key = new Vector<>();
+		Vector<Object> value = new Vector<>();
+		
+		int count = 0;
+		for(Entry<Integer, Integer> entry : countMap.entrySet()){
+			count += entry.getKey();
+			value.add(count);
+			key.add(entry.getValue());
+		}
+		
+		int maxX = (int)key.lastElement();
+		int maxY = (int)value.lastElement();
+		
+		Vector<Vector<Object>> vecOfVecs1 = new Vector<>();
+		Vector<Vector<Object>> vecOfVecs2 = new Vector<>();
+		vecOfVecs1.add(key);
+		vecOfVecs2.add(value);
+		Pair<Vector<Vector<Object>>, Vector<Vector<Object>>> pair = new Pair<Vector<Vector<Object>>, Vector<Vector<Object>>>(vecOfVecs1, vecOfVecs2);
+		
+		LinePlot lp = new LinePlot(pair, "consistent_intron_pairs_per_gene", "amount genes", "intron pairs", maxX, maxY, false, false);
+		lp.filename = "consistent_introns";
+		lp.showLegend = false;
+		lp.plot();
+	}
+	
 	public double[] getFoldChanges(int count1, int count2){
 		BetaDistribution betaDistrib = new BetaDistribution(count1 + 1.0, count2 + 1.0);
 		
@@ -754,7 +808,8 @@ public class GenesplitTSVReader {
 		GenesplitTSVReader r = new GenesplitTSVReader();
 		
 		r.readFiles(kidneyPaths, thyroidPaths);
-		r.applySteps_mode_1(kidneyPaths, thyroidPaths, 1);
+		r.createCumulativePlotOverlapIntronsPerGene();
+//		r.applySteps_mode_1(kidneyPaths, thyroidPaths, 1);
 //		r.writeToFile(new ConfigHelper().getDefaultOutputPath()+"consistent_introns.txt");
 		
 	}
