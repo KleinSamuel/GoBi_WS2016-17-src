@@ -8,16 +8,17 @@
 # output directory for files and plots and stuff
 # output_directory	DEFAULT
 # output_directory	D:/Dennis/Uni/GoBi/A3/EBV/
-output_directory	D:/Dennis/Uni/GoBi/A3/
+output_directory	H:/GOBI/
 #
 # directory for temporary files
-# temp_directory	DEFAULT
-temp_directory	D:/Dennis/Uni/GoBi/A3/EBV/
+temp_directory	DEFAULT
+# temp_directory	D:/Dennis/Uni/GoBi/A3/EBV/
 #
 # path to R binary
 # r_binary	/usr/bin/R
 # r_binary	/home/proj/biosoft/software/R/R-3.3.0/bin/R
-r_binary	D:/ProgramFiles/R/R-3.3.2/bin/R.exe
+# r_binary	D:/ProgramFiles/R/R-3.3.2/bin/R.exe
+r_binary	H:/GOBI/R-3.3.1/bin/R.exe
 #
 # output directory for objects
 object_directory	DEFAULT
