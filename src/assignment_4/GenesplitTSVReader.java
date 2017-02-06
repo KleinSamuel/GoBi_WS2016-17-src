@@ -101,11 +101,17 @@ public class GenesplitTSVReader {
 				
 				String[] currentLine = line.split("\t");
 				
-				String geneID = currentLine[0];
-				String chrID = currentLine[1];
-				boolean isOnNegativeStrand = currentLine[2].equals("-");
-				int start = Integer.parseInt(currentLine[3]);
-				int stop = Integer.parseInt(currentLine[4]);
+//				String geneID = currentLine[0];
+//				String chrID = currentLine[1];
+//				boolean isOnNegativeStrand = currentLine[2].equals("-");
+//				int start = Integer.parseInt(currentLine[3]);
+//				int stop = Integer.parseInt(currentLine[4]);
+				
+				String geneID = currentLine[4];
+				String chrID = currentLine[0];
+				boolean isOnNegativeStrand = currentLine[3].equals("-");
+				int start = Integer.parseInt(currentLine[1]);
+				int stop = Integer.parseInt(currentLine[2]);
 				
 				RelevantIntron currentIntron = new RelevantIntron(geneID, chrID, start, stop, isOnNegativeStrand);
 				
@@ -362,11 +368,17 @@ public class GenesplitTSVReader {
 				
 				String[] currentLine = line.split("\t");
 				
-				String geneID = currentLine[0];
-				String chrID = currentLine[1];
-				boolean isOnNegativeStrand = currentLine[2].equals("-");
-				int start = Integer.parseInt(currentLine[3]);
-				int stop = Integer.parseInt(currentLine[4]);
+//				String geneID = currentLine[0];
+//				String chrID = currentLine[1];
+//				boolean isOnNegativeStrand = currentLine[2].equals("-");
+//				int start = Integer.parseInt(currentLine[3]);
+//				int stop = Integer.parseInt(currentLine[4]);
+				
+				String geneID = currentLine[4];
+				String chrID = currentLine[0];
+				boolean isOnNegativeStrand = currentLine[3].equals("-");
+				int start = Integer.parseInt(currentLine[1]);
+				int stop = Integer.parseInt(currentLine[2]);
 				
 				if(intronMap.containsKey(chrID)){
 					TreeMap<Boolean, TreeMap<String, IntervalTree<RelevantIntron>>> strandMap = intronMap.get(chrID);
@@ -406,6 +418,7 @@ public class GenesplitTSVReader {
 				for(TreeMap<String, IntervalTree<RelevantIntron>> geneMap : strandMap.values()){
 					for(IntervalTree<RelevantIntron> intervalTree : geneMap.values()){
 						for(RelevantIntron i : intervalTree){
+							System.out.println(i.getGeneID());
 							bw.write(i.getGeneID()+":"+i.getStart()+":"+i.getStop()+"\n");
 						}
 					}
@@ -810,7 +823,7 @@ public class GenesplitTSVReader {
 		r.readFiles(kidneyPaths, thyroidPaths);
 		r.createCumulativePlotOverlapIntronsPerGene();
 //		r.applySteps_mode_1(kidneyPaths, thyroidPaths, 1);
-//		r.writeToFile(new ConfigHelper().getDefaultOutputPath()+"consistent_introns.txt");
+		r.writeToFile(new ConfigHelper().getDefaultOutputPath()+"consistent_introns.txt");
 		
 	}
 	
